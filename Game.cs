@@ -111,11 +111,20 @@ public class Game
 
     private void PlayOrDraw()
     {
-        // 
 
-        ///
-        // turn.current.ShowHand();
-        RenderTurnStatus();
+        // Wait for player to unhide his/her hand
+        while (true)
+        {
+            RenderTurnStatus();
+            Console.WriteLine("Tryk 'Mellemrum' for at se dine kort.");
+            ConsoleKeyInfo keyInput = Console.ReadKey();
+
+            if (keyInput.Key == ConsoleKey.Spacebar)
+            {
+                RenderTurnStatus();
+                break;
+            }
+        }
 
         int cardsToDraw = _dealer.AmountOfCardsToDrawNext(); // instead, just call a method in the console.writeline underneath this
         // we could then reset the draw debt as an internal proces every time Dealer.DealCard() has been called.
