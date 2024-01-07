@@ -4,21 +4,17 @@ public class Game
 
     public int id;
 
-    public Dealer _dealer;
-    public List<Player>? players;
+    public Dealer Dealer { get; init; }
 
     private Player? winner;
 
     public SequenceOfPlay? turn;
 
-    private List<Card> validNextSequence = new List<Card>();
-
-
     private IRender _render;
 
     private ILogger _logger;
 
-    public Game(IRender render, Dealer dealer, string[]? playerNames, ILogger? logger = null)
+    public Game(IRender render, Dealer dealer, ILogger? logger = null)
     {
         if (logger != null)
             _logger = logger;
@@ -27,15 +23,9 @@ public class Game
 
         _render = render;
 
-        if (playerNames?.Length > 0)
-        {
-            players = InitPlayers(playerNames);
-        }
+        id = 1; // for logging
 
-        id = 1;
-
-        _dealer = dealer;
-
+        Dealer = dealer;
 
     }
 
@@ -50,28 +40,23 @@ public class Game
 
         if (choice == "play")
         {
-            if (players == null)
-            {
-                string[] names = _render.Setup();
-                players = InitPlayers(names);
-            }
 
+            string[] playerNames = _render.Setup();
 
-
-            turn = new SequenceOfPlay(players); // should be held by dealer? Through this, dealer nows the players as well
 
             // seed deck, shuffle it, turn 1st card onto stack and deal cards to players
-            _dealer.DealCards(players);
+            Console.WriteLine(Dealer);
+            Dealer.AddPlayersAndDealCards(playerNames);
 
             _logger.InitGame(this);
 
 
-            while (!DoWeHaveAWinner())
+            while (!Dealer.DoWeHaveAWinner())
             {
                 NewTurn();
             }
 
-            _render.Result(winner.name);
+            _render.Result(Dealer.Winner?.Name ?? "Ukendt vinder");
 
             EndGame();
         }
@@ -91,50 +76,56 @@ public class Game
 
     private void NewTurn()
     {
-
+        // this should only be called when it is a new players turn.
+        // the !DrawAllowed call is a potential step 2 
+        // of the same players turn. Thus we cannot have
+        // the logic in this function.
+        // We need to makes sure, that PlayOrDraw does not return
+        // until the player either played
+        // a valid card or decided to pass
+        // on the turn to the next player
+        // after drawing a card.
+        // This should only call:
+        //      Dealer.NextTurn()
+        //      PlayOrDraw()
 
         // make current player the next in sequence
-        turn?.Next(); // should be the dealer who calls this.
+        Dealer.NextTurn(); // should be the dealer who calls this.
 
+        PlayOrDraw();
 
-
-
-        if (_dealer.IsDrawAllowed())
-        {
-            PlayOrDraw();
-        }
-
-        if (!_dealer.IsDrawAllowed())
-        {
-            // if we choose draw in prev we enter this
-            PlayOrNext();
-        }
+        return;
 
     }
 
     private void PlayOrDraw()
     {
 
+
+        // if player plays a "hop" card and the turn returns to the same player. No cards has to be hidden.
+        if (Dealer.CurrentPlayer == Dealer.PreviousPlayer)
+            Dealer.CurrentPlayer?.ShowHand();
+
+        RenderTurnStatus();
+
         // Wait for player to unhide his/her hand
-        while (true)
+        while (Dealer.CurrentPlayer?.HiddenHand() ?? true)
         {
-            turn.current.HideHand(true);
-            RenderTurnStatus();
             Console.WriteLine("Tryk 'Mellemrum' for at se dine kort.");
             ConsoleKeyInfo keyInput = Console.ReadKey();
 
             if (keyInput.Key == ConsoleKey.Spacebar)
             {
-                turn.current.HideHand(false);
+                Dealer.CurrentPlayer?.ShowHand();
                 RenderTurnStatus();
                 break;
             }
         }
 
-        int cardsToDraw = _dealer.AmountOfCardsToDrawNext(); // instead, just call a method in the console.writeline underneath this
+        // int cardsToDraw = _dealer.AmountOfCardsToDrawNext(); // instead, just call a method in the console.writeline underneath this
         // we could then reset the draw debt as an internal proces every time Dealer.DealCard() has been called.
 
-        Console.WriteLine($"(S)pil eller (T)ræk {cardsToDraw} kort op: ");
+        Console.WriteLine($"(S)pil eller (T)ræk {Dealer.AmountOfCardsToDrawNext()} kort op: ");
         string? readResult;
         List<int> choices = new List<int>();
 
@@ -143,28 +134,22 @@ public class Game
         if (readResult == "træk" || readResult == "t")
         {
             // draw cards
-            Console.WriteLine("Drawing some cards");
-            foreach (Card card in _dealer?.DrawNewCards(cardsToDraw))
+            for (int i = 0; i < Dealer.AmountOfCardsToDrawNext(); i++)
             {
+                Card card = Dealer.DealCard();
+                Dealer.CurrentPlayer?.DrawCard(card);
+                _logger.PlayerAction(Dealer.CurrentPlayer, "træk", Dealer.PeekPlayedTopCard(), DateTime.Now, id, card);
 
-                /* alternative:
-                CurrentPlayer will be datamember on dealer
-                we could do a for (int i = 0; i < cardsToDraw; i++) Dealer.CurrentPlayer.DrawCard(Dealer.DealCard());
-                and split the above up, so we still can log each card drawn.
-
-                // MAKE Dealer a property Getter so we can Call Dealer instead of _dealer backing field.
-
-                 */
-
-                turn?.current.DrawCard(card); // instead should be _dealer.CurrentPlayer.DrawCard(card);
-                _logger.PlayerAction(turn?.current, "træk", _dealer.PeekPlayedTopCard(), DateTime.Now, id, card);
             }
 
-            _dealer.ResetDrawDebt(); // should be private / internal. When Dealer.DealCard() is called, drawdebt is set to it's default
+            // After drawing 1 or more cards, we reset AmountOfCardsToPlay back to the default value
+            Dealer.ResetDrawDebt();
 
-            _dealer.AllowDrawing(false); // could be set to false everytime someone Dealer.DealCard() is called. It would then be set to true everytime a new turn is called.
+            Dealer.AllowDrawing(false); // could be set to false everytime someone Dealer.DealCard() is called. It would then be set to true everytime a new turn is called.
 
+            PlayOrNext();
             return;
+
 
         }
 
@@ -175,44 +160,33 @@ public class Game
             {
                 if (choice.Trim().ToLower() == "uno")
                 {
-                    turn.current.Uno = true; // should be Dealer.CurrentPlayer.Uno;
+                    Dealer.CurrentPlayer.SaysUno();
 
-                } //Hvis ikke man har sagt uno skal man trække 2 kort op.
+                }
                 else
                     choices.Add(Convert.ToInt32(choice));
             }
 
-
-
             // if choices are ids in valid range
-            if (turn?.current.ValidatePotentialHand(choices) ?? false) // validation of a hand could be moved to a HandValidator class.
+            if (Dealer.CurrentPlayer.ValidIdsOfPotentialHand(choices)) // validation of a hand could be moved to a HandValidator class.
             {
                 // if hand sequence is valid to play on stack
-                if (ValidNext(turn.current.PotentialHand()))  // Dealer.CurrentPlayer.PotentialHand();
+                if (Dealer.ValidHandToPlay(Dealer.CurrentPlayer.PotentialHand()))  // Dealer.CurrentPlayer.PotentialHand();
                 {
                     // play the valid hand sequence
-                    validNextSequence = turn.current.ConfirmHand(); // Dealer.CurrentPlayer.ConfirmHand();
-                    PlayNext();
-                }
-                else
-                {
-                    Console.WriteLine("hand sequence is not valid...");
-                    PlayOrDraw();
+                    Dealer.PlayHand(Dealer.CurrentPlayer.PlayPotentialHand()); // Dealer.CurrentPlayer.ConfirmHand();
+
+                    Dealer.CurrentPlayer.HideHand();
+                    return;
                 }
 
-            }
-            else
-            {
-                Console.WriteLine("choices was not valid - out of range...");
-                PlayOrDraw();
             }
 
 
         }
-        else
-        {
-            PlayOrDraw();
-        }
+        PlayOrDraw();
+        return;
+
 
 
     }
@@ -220,7 +194,12 @@ public class Game
     private void PlayOrNext()
     {
 
+
         RenderTurnStatus();
+
+
+        // int cardsToDraw = _dealer.AmountOfCardsToDrawNext(); // instead, just call a method in the console.writeline underneath this
+        // we could then reset the draw debt as an internal proces every time Dealer.DealCard() has been called.
 
         Console.WriteLine("Spil eller Næste: ");
         string? readResult;
@@ -228,80 +207,60 @@ public class Game
 
         readResult = Console.ReadLine();
 
-        if (readResult == "næste" || readResult == "n" || readResult == "")
+        if (readResult == "næste" || readResult == "n")
         {
-            // draw cards
-            Console.WriteLine("No cards to play - next player!");
-
+            Console.WriteLine($"Turen går videre til {Dealer.WhoIsNext()}");
+            Console.ReadLine();
+            return;
         }
 
         else if (readResult != null && readResult.Split(" ").All((choice) => choice.Trim().ToLower() == "uno" || int.TryParse(choice, out int _)))
         {
-            // "spit result into numbers"
+            // "split result into numbers"
             foreach (string choice in readResult.Split(" "))
             {
                 if (choice.Trim().ToLower() == "uno")
                 {
-                    turn.current.Uno = true;
+                    Dealer.CurrentPlayer.SaysUno();
 
-                } //Hvis ikke man har sagt uno skal man trække 2 kort op.
+                }
                 else
                     choices.Add(Convert.ToInt32(choice));
             }
 
+
+
             // if choices are ids in valid range
-            if (turn.current.ValidatePotentialHand(choices))
+            if (Dealer.CurrentPlayer.ValidIdsOfPotentialHand(choices)) // validation of a hand could be moved to a HandValidator class.
             {
                 // if hand sequence is valid to play on stack
-                if (ValidNext(turn.current.PotentialHand()))
+                if (Dealer.ValidHandToPlay(Dealer.CurrentPlayer.PotentialHand()))  // Dealer.CurrentPlayer.PotentialHand();
                 {
                     // play the valid hand sequence
-                    validNextSequence = turn.current.ConfirmHand();
-                    PlayNext();
-                }
-                else
-                {
-                    Console.WriteLine("hand sequence is not valid...");
-                    PlayOrNext();
+                    Dealer.PlayHand(Dealer.CurrentPlayer.PlayPotentialHand()); // Dealer.CurrentPlayer.ConfirmHand();
+                    return;
                 }
 
             }
-            else
-            {
-                Console.WriteLine("choices was not valid - out of range...");
-                PlayOrNext();
-            }
-
 
         }
-        else
-        {
-            PlayOrNext();
-        }
 
-        // get input. 
-        // if draw, we play draw on player
-        // if number, we send it to potential hand
-        // we then confirm it.
+        PlayOrNext();
+        return;
 
-        // ValidNext(turn.current.Play());
-
-        ///
-
-
-        _dealer.AllowDrawing(true);
     }
+
 
     private void EndGame()
     {
         /// Ends the game and announces a winner!
         /// 
 
-        if (winner == null)
+        if (Dealer.Winner == null)
             throw new Exception("Cannot end game withot a winner");
 
 
-        _logger.EndGame(winner);
+        _logger.EndGame(Dealer.Winner);
 
         if (_render.Replay())
             InitGame();
@@ -318,241 +277,6 @@ public class Game
 
     }
 
-    private bool ValidNext(List<Card> cards)
-    {
-        /// Validate if sequence of hands is valid sequence to play
-
-
-        /// Takes in a sequence of cards to play (1 or more...)
-        /// Responsible for validating 2 things:
-        ///     1) is the first card in the sequence valid to play as a next card on the stack?
-        ///     2) if 1 is true, and there is more than 1 card in the sequence, is the rest of the cards valid sequence cards?
-
-
-        bool validNext = true;
-
-        // is index 0 of sequence valid to play next?
-
-        // if any drawDebt and index 0 is not a draw card, the play is invalid
-        if (_dealer.GetCurrentDrawDebt() > 0)
-        {
-            Console.WriteLine("drawDebt above 0, validating for draw spec card");
-            if (cards[0] is SpecialCard sc)
-                Console.WriteLine($"SpecialCard modifier: {sc.modifier.GetType()}");
-
-            if (cards[0] is SpecialCard specialCardWithDrawDebt)
-            {
-                if (specialCardWithDrawDebt.modifier is not DrawModifier)
-                {
-                    Console.WriteLine("Can only play special drawcard when drawdebt > 0");
-                    Console.ReadLine();
-                    return false;
-                }
-            }
-            else if (cards[0] is RegCard)
-            {
-                Console.WriteLine("Cannot play reg card when there is drawDebt");
-                Console.ReadLine();
-                return false;
-
-            }
-
-        }
-
-
-        // check if first card of sequence is valid to play on stack topcard
-        Card playedTopCard = _dealer.PeekPlayedTopCard();
-        if (playedTopCard is RegCard playedTopRegCard)
-        {
-            if (cards[0] is RegCard r)
-            {
-                validNext = playedTopRegCard.ValidNext(r);
-            }
-            else if (cards[0] is SpecialCard s)
-            {
-                validNext = playedTopRegCard.ValidNext(s);
-            }
-        }
-        else if (playedTopCard is SpecialCard playedTopSpecCard)
-        {
-            if (cards[0] is RegCard r)
-            {
-                validNext = playedTopSpecCard.ValidNext(r);
-
-            }
-            else if (cards[0] is SpecialCard s)
-            {
-                validNext = playedTopSpecCard.ValidNext(s);
-
-            }
-        }
-
-        if (!validNext)
-        {
-            Console.WriteLine("Det kort kan man ikke spille her. Prøv igen!");
-            Console.ReadLine();
-            validNextSequence.Clear();
-            return false;
-        }
-
-
-        // is cards valid to play as a sequence?
-        // sequence rules: (if more than 1 card in sequence)
-        //      if index 0 is a regular, all other must be regular and same number
-        //      if index 0 is a special, it, and all others must be a special draw card (other specialcard types can only be played 1 at the time)
-
-        if (cards.Count > 1)
-        {
-            for (int i = 0; i < cards.Count - 1; i++)
-            {
-                Card current = cards[i];
-                Card next = cards[i + 1];
-
-                if (current is RegCard cR)
-                {
-                    if (next is RegCard nR)
-                    {
-                        if (cR.number != nR.number)
-                            validNext = false;
-                    }
-                    if (next is SpecialCard)
-                    {
-                        validNext = false;
-                    }
-                }
-                if (current is SpecialCard cS)
-                {
-                    if (cS.modifier is not DrawModifier)
-                        validNext = false;
-
-                    if (next is RegCard)
-                    {
-                        validNext = false;
-                    }
-                    if (next is SpecialCard nS)
-                    {
-                        if (nS.modifier is not DrawModifier)
-                        {
-                            validNext = false;
-                        }
-
-                    }
-                }
-
-                if (!validNext)
-                {
-                    Console.WriteLine("Nogle af kortene passer ikke sammen. Prøv igen!");
-                    Console.ReadLine();
-                    validNextSequence.Clear();
-                    return false;
-                }
-
-            }
-        }
-
-        validNextSequence = cards;
-        return true;
-
-
-    }
-
-    private void PlayNext()
-    {
-        /// Will play the last validated sequence of cards.
-        /// If it was not valid, this will throw Exception
-        if (validNextSequence.Count > 0)
-        {
-            foreach (Card card in validNextSequence)
-            {
-                _dealer.PlayNext(card);
-
-                // APPLY MODIFIER
-                if (card is SpecialCard s)
-                    ApplyModifier(s);
-            }
-        }
-        else
-        {
-            Console.WriteLine("No next valid sequence to play!");
-            Console.ReadLine();
-        }
-
-    }
-
-    private List<Player> InitPlayers(string[] names)
-    {
-        /// Create a new player object for each name in names
-        /// 
-
-        if (names.Length < 2)
-            throw new Exception("At least 2 players are needed.");
-
-        List<Player> players = new List<Player>();
-
-        foreach (string name in names)
-        {
-            players.Add(new Player(name));
-        }
-
-        return players;
-
-    }
-
-    private bool DoWeHaveAWinner()
-    {
-        // this checks if any of the players have 0 cards left.
-        // has to be called after each turn has been finished.
-
-        foreach (Player player in players)
-        {
-            if (player.Hand.Cards.Count == 0)
-            {
-
-                if (!player.Uno) // if player forgets to say "UNO", you have to draw 5 new cards!!!
-                {
-
-                    player.DrawCards(_dealer.DrawNewCards(5));
-
-                    break;
-
-                }
-
-                winner = player;
-
-                return true;
-            }
-            if (player.Hand.Cards.Count > 1)
-                player.Uno = false;
-
-        }
-
-        return false;
-    }
-
-    private void ApplyModifier(SpecialCard card)
-    {
-
-        if (card.modifier is DrawModifier d)
-        {
-            _dealer.AddDrawDebt(d.amount);
-        }
-        if (card.modifier is SkipSequenceModifier)
-        {
-            SkipRound();
-        }
-        if (card.modifier is ReverseSequenceModifier)
-        {
-            ReverseRound();
-        }
-        if (card.modifier is ColorModifier c)
-        {
-            c.InitMod();
-        }
-    }
-
-
-
-
     private void RenderTurnStatus()
     {
         _render.Turn(this);
@@ -562,32 +286,7 @@ public class Game
 
 
 
-    private void showPlayers()
-    {
-        foreach (Player player in this.players)
-        {
-            if (player == this.turn.current)
-                System.Console.WriteLine($"* {player.name}");
 
-            else
-                System.Console.WriteLine($"  {player.name}");
-        }
-    }
-
-    private void playHand()
-    {
-
-    }
-
-    private void SkipRound()
-    {
-        turn.Skip();
-    }
-
-    private void ReverseRound()
-    {
-        turn.Reverse();
-    }
 
 }
 

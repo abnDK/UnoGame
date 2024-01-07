@@ -26,16 +26,7 @@ public class Card
         return this;
     }
 
-    public virtual bool ValidNext(RegCard card)
-    {
-        System.Console.WriteLine("IMPLEMENT THIS IN CHILD CLASS");
-        return false;
-    }
-    public virtual bool ValidNext(SpecialCard card)
-    {
-        System.Console.WriteLine("IMPLEMENT THIS IN CHILD CLASS");
-        return false;
-    }
+
 
     public void changeColor(string color)
     {

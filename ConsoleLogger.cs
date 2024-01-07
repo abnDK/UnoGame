@@ -2,7 +2,7 @@ public class ConsoleLogger : ILogger
 {
     public void InitGame(Game game)
     {
-        Console.WriteLine($"Logging who the players are {game.players}, id of game {game.id} and datetime {DateTime.Now}");
+        Console.WriteLine($"Logging who the players are {game.Dealer.Players}, id of game {game.id} and datetime {DateTime.Now}");
         Console.ReadKey();
 
     }
@@ -16,7 +16,7 @@ public class ConsoleLogger : ILogger
 
     public void EndGame(Player player)
     {
-        Console.WriteLine($"Logs who won the game {player.name}");
+        Console.WriteLine($"Logs who won the game {player.Name}");
         Console.ReadKey();
     }
 }

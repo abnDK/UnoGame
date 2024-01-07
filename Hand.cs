@@ -9,7 +9,7 @@ public class Hand
 
     private List<Card>? remainingHand;
 
-    private bool hidden = false;
+    private bool hidden;
 
 
     public Hand()
@@ -21,6 +21,11 @@ public class Hand
     public void HideHand(bool makeHidden)
     {
         hidden = makeHidden;
+    }
+
+    public bool HandHidden()
+    {
+        return hidden;
     }
 
     public List<Card> Cards
@@ -49,9 +54,21 @@ public class Hand
 
     public void Draw(Card card)
     {
+
+        // if hand is hidden, we cannot add cards to the hand
+        // so we temporarily show hand and return to previous state
+        // afterwards.
+
+        bool tempHidden = hidden;
+        if (hidden)
+            hidden = false;
+
         Cards.Add(card);
+
+        hidden = tempHidden;
+
     }
-    public bool ValidatePotentialHand(List<int> ids)
+    public bool ValidIdsOfPotentialHand(List<int> ids)
     {
         /// Validates if ids is in valid range of the players current hand
 

@@ -1,6 +1,6 @@
 public abstract class Modifier
 {
-    public string name;
+    public string? name;
     public virtual void InitMod()
     {
         System.Console.WriteLine("This init's a mod");
@@ -69,7 +69,6 @@ public class ColorModifier : Modifier
         Console.WriteLine("3) Grøn");
         Console.WriteLine("4) Rød");
 
-        bool validColor = false;
         string? readResult;
 
         while (true)

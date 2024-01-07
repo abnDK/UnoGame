@@ -65,19 +65,19 @@ public class BasicRender : IRender
 
         Console.Clear();
         Console.WriteLine("PLAYERS: ");
-        foreach (Player player in game.turn.sequence)
+        foreach (Player player in game.turn.Players)
         {
             if (game.turn.current == player)
             {
-                Console.WriteLine($"-> {player.name}");
+                Console.WriteLine($"-> {player.Name}");
             }
             else
             {
-                Console.WriteLine($"   {player.name}");
+                Console.WriteLine($"   {player.Name}");
             }
         }
 
-        renderStack(game._dealer.PeekPlayedTopCard());
+        renderStack(game.Dealer.PeekPlayedTopCard());
 
         Console.WriteLine("PLAYER HAND: ");
         // turn.current.ShowHand();

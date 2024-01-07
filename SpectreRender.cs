@@ -138,21 +138,21 @@ public class SpectreRender : IRender
         // RENDER PLAYER NAME
         Grid playerGrid = new Grid();
         playerGrid.AddColumn();
-        foreach (Player player in game.players)
+        foreach (Player player in game.Dealer.Players)
         {
             Panel playerPanel = new Panel(String.Empty);
 
-            if (player.name == game.turn.current.name)
+            if (player.Name == game.Dealer.CurrentPlayer?.Name)
             {
                 playerPanel = new Panel(
-                    new Text($">>> {player.name}",
+                    new Text($">>> {player.Name}",
                     new Style(Color.Red, null, Decoration.Bold)
                 ));
             }
             else
             {
                 playerPanel = new Panel(
-                    new Text($"    {player.name}",
+                    new Text($"    {player.Name}",
                     new Style(Color.White, null, null)
                 ));
             }
@@ -173,7 +173,7 @@ public class SpectreRender : IRender
         List<Panel> cards = new List<Panel>();
         int cardNum = 1;
 
-        foreach (Card card in game.turn.current.Hand.Cards)
+        foreach (Card card in game.Dealer.CurrentPlayer?.Hand.Cards ?? throw new Exception("no currentplayer"))
         {
 
             if (card is HiddenCard)
@@ -198,7 +198,7 @@ public class SpectreRender : IRender
         {
             cardsOnRow.Add(cards[i]);
 
-            AnsiConsole.WriteLine(cards[i].Header.Text);
+            AnsiConsole.WriteLine(cards[i]?.Header?.Text ?? "-");
             AnsiConsole.WriteLine(cardsOnRow.Count);
 
             if ((i + 1) % COLUMNS == 0 || (i + 1) == cards.Count)
@@ -225,27 +225,27 @@ public class SpectreRender : IRender
         stack.AddRow(
             Align.Center(
                 RenderLargeCardPanel(
-                    game._dealer.PeekPlayedTopCard(),
+                    game.Dealer.PeekPlayedTopCard(),
                     Justify.Center
                 )
             )
         );
 
-        if (game._dealer.PlayedCardsCount() > 1)
+        if (game.Dealer.PlayedCardsCount() > 1)
         {
-            stack.AddRow(Align.Center(RenderSmallCard(game._dealer.PeekPlayedTopCard(1), null)));
+            stack.AddRow(Align.Center(RenderSmallCard(game.Dealer.PeekPlayedTopCard(1), null)));
         }
-        if (game._dealer.PlayedCardsCount() > 2)
+        if (game.Dealer.PlayedCardsCount() > 2)
         {
-            stack.AddRow(Align.Center(RenderSmallCard(game._dealer.PeekPlayedTopCard(2), null)));
+            stack.AddRow(Align.Center(RenderSmallCard(game.Dealer.PeekPlayedTopCard(2), null)));
         }
-        if (game._dealer.PlayedCardsCount() > 3)
+        if (game.Dealer.PlayedCardsCount() > 3)
         {
-            stack.AddRow(Align.Center(RenderSmallCard(game._dealer.PeekPlayedTopCard(3), null)));
+            stack.AddRow(Align.Center(RenderSmallCard(game.Dealer.PeekPlayedTopCard(3), null)));
         }
-        if (game._dealer.PlayedCardsCount() > 4)
+        if (game.Dealer.PlayedCardsCount() > 4)
         {
-            stack.AddRow(Align.Center(RenderSmallCard(game._dealer.PeekPlayedTopCard(4), null)));
+            stack.AddRow(Align.Center(RenderSmallCard(game.Dealer.PeekPlayedTopCard(4), null)));
         }
 
 

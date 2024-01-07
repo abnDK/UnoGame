@@ -2,16 +2,22 @@ public class SequenceOfPlay
 {
     private int index;
     private bool reverse;
-    public List<Player> sequence;
+    public List<Player>? Players { get; set; }
 
-    public Player current;
+    public Player? current;
 
-    public SequenceOfPlay(List<Player> players)
+    public SequenceOfPlay()
     {
-        this.index = 10000;
-        this.reverse = false;
-        this.sequence = players;
-        this.current = Next();
+        index = 10000;
+        reverse = false;
+    }
+
+    public void SetPlayers(List<Player> players)
+    {
+        Players = players;
+        current = Next();
+
+
     }
 
     public Player Next()
@@ -19,8 +25,14 @@ public class SequenceOfPlay
 
         Increment();
 
-        current = sequence[index % sequence.Count];
+        current = Players[index % Players.Count];
         return current;
+
+    }
+
+    public Player PeekNext()
+    {
+        throw new Exception("NOT IMPLEMENTED YET"); // find a way to get next without incrementing the index
 
     }
 

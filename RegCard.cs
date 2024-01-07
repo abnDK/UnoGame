@@ -18,22 +18,6 @@ public class RegCard : Card
     {
         return this;
     }
-    public override bool ValidNext(RegCard card)
-    {
-        if (this.Color == card.Color || this.number == card.number)
-        {
-            return true;
-        }
-        return false;
-    }
-    public override bool ValidNext(SpecialCard card)
-    {
-        if (this.Color == card.Color || card.modifier is ColorModifier) // only skip color validation if a color modifiercard
-        {
-            return true;
-        }
-        return false;
-    }
 
 
 }

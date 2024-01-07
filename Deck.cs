@@ -162,8 +162,7 @@ public class Deck
         for (int i = 0; i < amount; i++)
         {
             Card poppedCard = DrawNext();
-            // Card poppedElement = this.storedCards[this.storedCards.Count - 1];
-            // this.storedCards.RemoveAt(this.storedCards.Count - 1);
+
             drawnCards.Add(poppedCard);
         }
         return drawnCards;

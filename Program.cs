@@ -31,10 +31,29 @@
 
         static void Main(string[] args)
         {
-            Game newGame = new Game(new SpectreRender(), new Dealer(new Deck()), args);
+
+            Game newGame = new Game(
+                                    new SpectreRender(),
+                                    new Dealer(
+                                        new Deck(),
+                                        new SequenceOfPlay(),
+                                        new HandValidator()));
 
             newGame.InitGame();
 
+
+            /* 
+                        var dealer = new Dealer(
+                            new Deck(),
+                            new SequenceOfPlay(),
+                            new HandValidator()
+                        );
+
+                        dealer.InitPlayersTest(new string[] { "anders", "britt" });
+
+
+                        dealer.DoWeHaveAWinner();
+             */
 
 
         }

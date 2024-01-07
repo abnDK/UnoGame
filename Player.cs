@@ -1,7 +1,19 @@
 public class Player
 {
-
-    public string name;
+    private string _name;
+    public string Name
+    {
+        get
+        {
+            if (Uno)
+                return $"{_name}: Uno!";
+            return _name;
+        }
+        private set
+        {
+            _name = value;
+        }
+    }
     private Hand _hand;
 
     public bool Uno = false;
@@ -17,13 +29,28 @@ public class Player
 
     public Player(string name)
     {
-        this.name = name;
+        _name = name;
         this._hand = new Hand();
     }
 
-    public void HideHand(bool hide)
+    public int CardCount()
     {
-        Hand.HideHand(hide);
+        return Hand.Count();
+    }
+
+    public void HideHand()
+    {
+        Hand.HideHand(true);
+    }
+
+    public void ShowHand()
+    {
+        Hand.HideHand(false);
+    }
+
+    public bool HiddenHand()
+    {
+        return Hand.HandHidden();
     }
 
     public void DrawCard(Card card)
@@ -37,16 +64,26 @@ public class Player
             DrawCard(card);
     }
 
-    public bool ValidatePotentialHand(List<int> choices)
+    public void SaysUno()
     {
-        if (Hand.ValidatePotentialHand(choices))
+        // if Uno is expressed while player has 1 card left, they CHEAT!
+        // thus uno cannot be set!
+        if (CardCount() == 1)
+        {
+            return;
+        }
+        Uno = true;
+    }
+    public bool ValidIdsOfPotentialHand(List<int> choices)
+    {
+        if (Hand.ValidIdsOfPotentialHand(choices))
             return true;
 
         return false;
 
     }
 
-    public List<Card> ConfirmHand()
+    public List<Card> PlayPotentialHand()
     {
         return Hand.ConfirmHand();
 

@@ -37,25 +37,6 @@ public class SpecialCard : Card
         return this.modifier; // this makes no sense for ColorModifier for now....
     }
 
-    public override bool ValidNext(RegCard card)
-    {
-        if (this.Color == card.Color)
-        {
-            return true;
-        }
-        return false;
-    }
-    public override bool ValidNext(SpecialCard card)
-    {
-        if (this.Color == card.Color ||
-            card.modifier.GetType() == modifier.GetType() ||
-            card.modifier is ColorModifier
-        )
-        {
-            return true;
-        }
-        return false;
-    }
 
 
 
