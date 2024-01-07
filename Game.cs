@@ -216,7 +216,7 @@ public class Game
 
         if (readResult == "næste" || readResult == "n")
         {
-            Console.WriteLine($"Turen går videre til {Dealer.WhoIsNext()}");
+            Console.WriteLine($"Turen går videre til {Dealer.WhoIsNext().Name}");
             Console.ReadLine();
             return;
         }

@@ -32,7 +32,9 @@ public class SequenceOfPlay
 
     public Player PeekNext()
     {
-        throw new Exception("NOT IMPLEMENTED YET"); // find a way to get next without incrementing the index
+        if (reverse)
+            return Players?[(index - 1) % Players.Count] ?? throw new Exception("No players available!");
+        return Players?[(index + 1) % Players.Count] ?? throw new Exception("No players available!");
 
     }
 

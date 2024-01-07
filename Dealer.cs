@@ -257,9 +257,9 @@ public class Dealer
         SequenceOfPlay.Reverse();
     }
 
-    public string WhoIsNext()
+    public Player WhoIsNext()
     {
-        return "TODO";
+        return SequenceOfPlay.PeekNext();
     }
 
     public bool DoWeHaveAWinner()

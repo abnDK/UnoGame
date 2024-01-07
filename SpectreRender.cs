@@ -144,15 +144,18 @@ public class SpectreRender : IRender
 
             if (player.Name == game.Dealer.CurrentPlayer?.Name)
             {
+                string playerName = player.Uno ? $"{player.Name}: Uno!" : player.Name;
                 playerPanel = new Panel(
-                    new Text($">>> {player.Name}",
+                    new Text($">>> {playerName}",
                     new Style(Color.Red, null, Decoration.Bold)
                 ));
             }
             else
             {
+                string playerName = player.Uno ? $"{player.Name}: Uno!" : player.Name;
+
                 playerPanel = new Panel(
-                    new Text($"    {player.Name}",
+                    new Text($"    {playerName}",
                     new Style(Color.White, null, null)
                 ));
             }

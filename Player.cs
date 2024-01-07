@@ -5,8 +5,6 @@ public class Player
     {
         get
         {
-            if (Uno)
-                return $"{_name}: Uno!";
             return _name;
         }
         private set
