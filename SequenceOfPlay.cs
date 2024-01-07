@@ -25,7 +25,7 @@ public class SequenceOfPlay
 
         Increment();
 
-        current = Players[index % Players.Count];
+        current = Players?[index % Players.Count] ?? throw new Exception("No players available!");
         return current;
 
     }

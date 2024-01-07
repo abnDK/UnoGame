@@ -65,9 +65,9 @@ public class BasicRender : IRender
 
         Console.Clear();
         Console.WriteLine("PLAYERS: ");
-        foreach (Player player in game.turn.Players)
+        foreach (Player player in game.Dealer.Players)
         {
-            if (game.turn.current == player)
+            if (game.Dealer.CurrentPlayer == player)
             {
                 Console.WriteLine($"-> {player.Name}");
             }
@@ -81,7 +81,7 @@ public class BasicRender : IRender
 
         Console.WriteLine("PLAYER HAND: ");
         // turn.current.ShowHand();
-        RenderPlayerHand(game.turn.current.Hand.Cards);
+        RenderPlayerHand(game.Dealer.CurrentPlayer?.Hand.Cards ?? throw new Exception("Cannot render hand without a player!"));
 
 
     }

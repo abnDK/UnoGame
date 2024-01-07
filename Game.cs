@@ -138,7 +138,14 @@ public class Game
             {
                 Card card = Dealer.DealCard();
                 Dealer.CurrentPlayer?.DrawCard(card);
-                _logger.PlayerAction(Dealer.CurrentPlayer, "træk", Dealer.PeekPlayedTopCard(), DateTime.Now, id, card);
+                _logger.PlayerAction(
+                    Dealer.CurrentPlayer ?? new Player("Ukendt spiller"),
+                    "træk",
+                    Dealer.PeekPlayedTopCard(),
+                    DateTime.Now,
+                    id,
+                    card
+                );
 
             }
 
@@ -160,7 +167,7 @@ public class Game
             {
                 if (choice.Trim().ToLower() == "uno")
                 {
-                    Dealer.CurrentPlayer.SaysUno();
+                    Dealer.CurrentPlayer?.SaysUno();
 
                 }
                 else
@@ -168,13 +175,13 @@ public class Game
             }
 
             // if choices are ids in valid range
-            if (Dealer.CurrentPlayer.ValidIdsOfPotentialHand(choices)) // validation of a hand could be moved to a HandValidator class.
+            if (Dealer.CurrentPlayer?.ValidIdsOfPotentialHand(choices) ?? throw new Exception("CurrentPlayer not found!"))
             {
                 // if hand sequence is valid to play on stack
-                if (Dealer.ValidHandToPlay(Dealer.CurrentPlayer.PotentialHand()))  // Dealer.CurrentPlayer.PotentialHand();
+                if (Dealer.ValidHandToPlay(Dealer.CurrentPlayer.PotentialHand()))
                 {
                     // play the valid hand sequence
-                    Dealer.PlayHand(Dealer.CurrentPlayer.PlayPotentialHand()); // Dealer.CurrentPlayer.ConfirmHand();
+                    Dealer.PlayHand(Dealer.CurrentPlayer.PlayPotentialHand());
 
                     Dealer.CurrentPlayer.HideHand();
                     return;
@@ -221,7 +228,7 @@ public class Game
             {
                 if (choice.Trim().ToLower() == "uno")
                 {
-                    Dealer.CurrentPlayer.SaysUno();
+                    Dealer.CurrentPlayer?.SaysUno();
 
                 }
                 else
@@ -231,7 +238,7 @@ public class Game
 
 
             // if choices are ids in valid range
-            if (Dealer.CurrentPlayer.ValidIdsOfPotentialHand(choices)) // validation of a hand could be moved to a HandValidator class.
+            if (Dealer.CurrentPlayer?.ValidIdsOfPotentialHand(choices) ?? throw new Exception("CurrentPlayer not found!")) // validation of a hand could be moved to a HandValidator class.
             {
                 // if hand sequence is valid to play on stack
                 if (Dealer.ValidHandToPlay(Dealer.CurrentPlayer.PotentialHand()))  // Dealer.CurrentPlayer.PotentialHand();
@@ -272,7 +279,7 @@ public class Game
 
         readResult = Console.ReadLine();
 
-        if (readResult.Trim().ToLower() == "ja")
+        if (readResult != null && readResult.Trim().ToLower() == "ja")
             InitGame();
 
     }
