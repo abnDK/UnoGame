@@ -17,7 +17,7 @@ public class DrawModifier : Modifier
     }
     public override void InitMod()
     {
-        Console.WriteLine($"Add {this.amount} cards to draw hands variable.");
+        Console.WriteLine($"Add {amount} cards to draw hands variable.");
     }
 }
 
