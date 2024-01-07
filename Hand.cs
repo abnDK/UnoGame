@@ -1,7 +1,7 @@
 
 public class Hand
 {
-    public List<Card> cards;
+    private List<Card> _cards;
 
     private List<Card>? potentialHand;
 
@@ -9,15 +9,47 @@ public class Hand
 
     private List<Card>? remainingHand;
 
+    private bool hidden = false;
+
 
     public Hand()
     {
-        this.cards = new List<Card>();
+        _cards = new List<Card>();
 
     }
+
+    public void HideHand(bool makeHidden)
+    {
+        hidden = makeHidden;
+    }
+
+    public List<Card> Cards
+    {
+        get
+        {
+            if (hidden)
+            {
+
+                List<Card> hiddenHand = new List<Card>();
+
+                for (int i = 0; i < _cards.Count; i++)
+                {
+                    hiddenHand.Add(new HiddenCard("None"));
+                }
+
+                return hiddenHand;
+            }
+            return _cards;
+        }
+        set
+        {
+            _cards = value;
+        }
+    }
+
     public void Draw(Card card)
     {
-        cards.Add(card);
+        Cards.Add(card);
     }
     public bool ValidatePotentialHand(List<int> ids)
     {
@@ -31,7 +63,7 @@ public class Hand
         // VALIDATION FOR IDS BEING IN RANGE!!
         if (ids.Any((id) =>
         {
-            bool cond = id < 1 || id > cards.Count;
+            bool cond = id < 1 || id > Cards.Count;
             return cond;
         }))
         {
@@ -42,7 +74,7 @@ public class Hand
         {
             // ids stem from choices in a menu, that is 1-indexed
             int zeroIndexId = id - 1;
-            potentialHand.Add(cards[zeroIndexId]);
+            potentialHand.Add(Cards[zeroIndexId]);
             potentialHandIds.Add(zeroIndexId);
 
         }
@@ -93,27 +125,27 @@ public class Hand
 
         remainingHand = new List<Card>();
 
-        for (int i = 0; i < cards.Count; i++)
+        for (int i = 0; i < Cards.Count; i++)
         {
             if (!potentialHandIds.Contains(i))
             {
-                remainingHand.Add(cards[i]);
+                remainingHand.Add(Cards[i]);
             }
         }
 
-        cards = remainingHand;
+        Cards = remainingHand;
 
         return confirmedHand;
     }
 
     public int Count()
     {
-        return cards.Count;
+        return Cards.Count;
     }
 
     public void Sort()
     {
-        cards.Sort((Card a, Card b) =>
+        Cards.Sort((Card a, Card b) =>
         {
             // implemented custom CompareTo on Card class
             return a.CompareTo(b);

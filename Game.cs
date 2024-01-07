@@ -115,12 +115,14 @@ public class Game
         // Wait for player to unhide his/her hand
         while (true)
         {
+            turn.current.HideHand(true);
             RenderTurnStatus();
             Console.WriteLine("Tryk 'Mellemrum' for at se dine kort.");
             ConsoleKeyInfo keyInput = Console.ReadKey();
 
             if (keyInput.Key == ConsoleKey.Spacebar)
             {
+                turn.current.HideHand(false);
                 RenderTurnStatus();
                 break;
             }
@@ -500,7 +502,7 @@ public class Game
 
         foreach (Player player in players)
         {
-            if (player.Hand.cards.Count == 0)
+            if (player.Hand.Cards.Count == 0)
             {
 
                 if (!player.Uno) // if player forgets to say "UNO", you have to draw 5 new cards!!!
@@ -516,7 +518,7 @@ public class Game
 
                 return true;
             }
-            if (player.Hand.cards.Count > 1)
+            if (player.Hand.Cards.Count > 1)
                 player.Uno = false;
 
         }

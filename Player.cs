@@ -21,7 +21,10 @@ public class Player
         this._hand = new Hand();
     }
 
-
+    public void HideHand(bool hide)
+    {
+        Hand.HideHand(hide);
+    }
 
     public void DrawCard(Card card)
     {

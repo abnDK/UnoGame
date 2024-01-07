@@ -173,10 +173,16 @@ public class SpectreRender : IRender
         List<Panel> cards = new List<Panel>();
         int cardNum = 1;
 
-        foreach (Card card in game.turn.current.Hand.cards)
+        foreach (Card card in game.turn.current.Hand.Cards)
         {
 
-            cards.Add(RenderSmallCard(card, cardNum));
+            if (card is HiddenCard)
+                cards.Add(RenderSmallCard(card, cardNum));
+
+
+            else
+                cards.Add(RenderSmallCard(card, cardNum));
+
             cardNum++;
         }
 
@@ -391,6 +397,15 @@ public class SpectreRender : IRender
                             ).Centered()
                         );
 
+        }
+        else if (card is HiddenCard h)
+        {
+            panelCard = new Panel(
+                new Text(
+                    $"\n{h.Name}\n",
+                    new Style(ResolveColor(h.Color), null, Decoration.Bold)
+                ).Centered()
+            );
         }
         else
         {

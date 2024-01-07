@@ -81,7 +81,7 @@ public class BasicRender : IRender
 
         Console.WriteLine("PLAYER HAND: ");
         // turn.current.ShowHand();
-        RenderPlayerHand(game.turn.current.Hand.cards);
+        RenderPlayerHand(game.turn.current.Hand.Cards);
 
 
     }
