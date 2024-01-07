@@ -61,7 +61,6 @@ public class Game
             turn = new SequenceOfPlay(players); // should be held by dealer? Through this, dealer nows the players as well
 
             // seed deck, shuffle it, turn 1st card onto stack and deal cards to players
-            _dealer.PrepareDeck(); // rename to InitDeck() ??
             _dealer.DealCards(players);
 
             _logger.InitGame(this);

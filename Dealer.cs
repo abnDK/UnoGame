@@ -10,6 +10,7 @@ public class Dealer
     public Dealer(Deck deck)
     {
         _deck = deck;
+        PrepareDeck();
     }
 
     public void PrepareDeck()
