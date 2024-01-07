@@ -18,10 +18,14 @@ public class Game
 
     private ILogger _logger;
 
-    public Game(IRender render, ILogger logger, Dealer dealer, string[]? playerNames)
+    public Game(IRender render, Dealer dealer, string[]? playerNames, ILogger? logger = null)
     {
+        if (logger != null)
+            _logger = logger;
+        else
+            _logger = new SilentLogger();
+
         _render = render;
-        _logger = logger;
 
         if (playerNames?.Length > 0)
         {

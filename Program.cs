@@ -31,7 +31,7 @@
 
         static void Main(string[] args)
         {
-            Game newGame = new Game(new SpectreRender(), new SilentLogger(), new Dealer(new Deck()), args);
+            Game newGame = new Game(new SpectreRender(), new Dealer(new Deck()), args);
 
             newGame.InitGame();
 
