@@ -2,7 +2,7 @@ public class Dealer
 {
     private Deck _deck;
 
-    private int HANDSIZE = 2;
+    private int HANDSIZE = 7;
     private int STANDARDDRAWAMOUNT = 1;
     private int drawDebt = 0;
     private bool drawAllowed = true;
