@@ -218,6 +218,9 @@ public class Game
         {
             Console.WriteLine($"Turen går videre til {Dealer.WhoIsNext().Name}");
             Console.ReadLine();
+
+            Dealer.CurrentPlayer.HideHand();
+
             return;
         }
 
@@ -245,6 +248,9 @@ public class Game
                 {
                     // play the valid hand sequence
                     Dealer.PlayHand(Dealer.CurrentPlayer.PlayPotentialHand()); // Dealer.CurrentPlayer.ConfirmHand();
+
+                    Dealer.CurrentPlayer.HideHand();
+
                     return;
                 }
 
