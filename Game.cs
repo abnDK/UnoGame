@@ -219,7 +219,7 @@ public class Game
             Console.WriteLine($"Turen går videre til {Dealer.WhoIsNext().Name}");
             Console.ReadLine();
 
-            Dealer.CurrentPlayer.HideHand();
+            Dealer.CurrentPlayer?.HideHand();
 
             return;
         }
